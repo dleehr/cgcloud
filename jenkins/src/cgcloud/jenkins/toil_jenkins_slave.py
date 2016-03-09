@@ -235,11 +235,11 @@ class ToilJenkinsSlave( UbuntuTrustyGenericJenkinsSlave,
     @fabric_task
     def __configure_slurm( self ):
         """
-        Configures SLURM per http://sphaleron.blogspot.com/2011/08/really-super-quick-start-guide-to.html
+        Configures SLURM in a single-node configuration with text-file accounting
         :return:
         """
+        # Create munge key and start
         sudo('/usr/sbin/create-munge-key')
-        # start munge
         sudo('/usr/sbin/service munge start')
         #3a. Make config file: https://computing.llnl.gov/linux/slurm/configurator.html
         slurm_conf = """
@@ -284,10 +284,14 @@ NodeName=localhost Procs=1 State=UNKNOWN
 PartitionName=debug Nodes=localhost Default=YES MaxTime=INFINITE State=UP
         """
         file_name = '/etc/slurm-llnl/slurm.conf'
-        #3b. Put config file in: /etc/slurm-llnl/slurm.conf
+        # Put config file in: /etc/slurm-llnl/slurm.conf
         put( remote_path=file_name, local_path=StringIO( slurm_conf ) )
-        #4. Start master: # slurmctld
-        #5. Start node: # slurmd
+
+        # Touch the accounting job file and make sure it's owned by slurm user
+        sudo('touch /var/run/slurm-llnl/slurm-acct.txt')
+        sudo('chown slurm:slurm /var/run/slurm-llnl/slurm-acct.txt')
+
+        # Start slurm services
         sudo('/usr/sbin/service slurm-llnl start')
 
     def _docker_users( self ):
