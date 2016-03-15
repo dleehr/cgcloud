@@ -284,11 +284,16 @@ class ToilJenkinsSlave( UbuntuTrustyGenericJenkinsSlave,
             NodeName=localhost Procs=1 State=UNKNOWN
             PartitionName=debug Nodes=localhost Default=YES MaxTime=INFINITE State=UP
         """)
-        file_name = '/etc/slurm-llnl/slurm.conf'
+        slurm_conf_tmp = '/tmp/slurm.conf'
+        slurm_conf_file = '/etc/slurm-llnl/slurm.conf'
         # Put config file in: /etc/slurm-llnl/slurm.conf
-        put( remote_path=file_name, local_path=StringIO( slurm_conf ) )
+        put( remote_path=slurm_conf_tmp, local_path=StringIO( slurm_conf ) )
+        sudo( 'mkdir -p /etc/slurm-llnl')
+        sudo( 'mv %s %s' % (slurm_conf_tmp, slurm_conf_file ) )
+        sudo('chown root:root %s' % slurm_conf_file )
 
         # Touch the accounting job file and make sure it's owned by slurm user
+        sudo('mkdir -p /var/run/slurm-llnl')
         sudo('touch /var/run/slurm-llnl/slurm-acct.txt')
         sudo('chown slurm:slurm /var/run/slurm-llnl/slurm-acct.txt')
 
