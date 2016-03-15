@@ -242,47 +242,48 @@ class ToilJenkinsSlave( UbuntuTrustyGenericJenkinsSlave,
         sudo('/usr/sbin/create-munge-key')
         sudo('/usr/sbin/service munge start')
         #3a. Make config file: https://computing.llnl.gov/linux/slurm/configurator.html
-        slurm_conf = """
-ClusterName=jenkins-testing
-ControlMachine=localhost
-SlurmUser=slurm
-SlurmctldPort=6817
-SlurmdPort=6818
-StateSaveLocation=/tmp
-SlurmdSpoolDir=/tmp/slurmd
-SwitchType=switch/none
-MpiDefault=none
-SlurmctldPidFile=/var/run/slurmctld.pid
-SlurmdPidFile=/var/run/slurmd.pid
-ProctrackType=proctrack/pgid
-CacheGroups=0
-ReturnToService=0
-SlurmctldTimeout=300
-SlurmdTimeout=300
-InactiveLimit=0
-MinJobAge=300
-KillWait=30
-Waittime=0
-SchedulerType=sched/backfill
-SelectType=select/linear
-FastSchedule=1
 
-# LOGGING
-SlurmctldDebug=3
-SlurmdDebug=3
-JobCompType=jobcomp/none
+        slurm_conf = heredoc("""
+            ClusterName=jenkins-testing
+            ControlMachine=localhost
+            SlurmUser=slurm
+            SlurmctldPort=6817
+            SlurmdPort=6818
+            StateSaveLocation=/tmp
+            SlurmdSpoolDir=/tmp/slurmd
+            SwitchType=switch/none
+            MpiDefault=none
+            SlurmctldPidFile=/var/run/slurmctld.pid
+            SlurmdPidFile=/var/run/slurmd.pid
+            ProctrackType=proctrack/pgid
+            CacheGroups=0
+            ReturnToService=0
+            SlurmctldTimeout=300
+            SlurmdTimeout=300
+            InactiveLimit=0
+            MinJobAge=300
+            KillWait=30
+            Waittime=0
+            SchedulerType=sched/backfill
+            SelectType=select/linear
+            FastSchedule=1
 
-# ACCOUNTING
-AccountingStorageLoc=/var/run/slurm-llnl/slurm-acct.txt
-AccountingStorageType=accounting_storage/filetxt
-AccountingStoreJobComment=YES
-JobAcctGatherFrequency=30
-JobAcctGatherType=jobacct_gather/linux
+            # LOGGING
+            SlurmctldDebug=3
+            SlurmdDebug=3
+            JobCompType=jobcomp/none
 
-# COMPUTE NODES
-NodeName=localhost Procs=1 State=UNKNOWN
-PartitionName=debug Nodes=localhost Default=YES MaxTime=INFINITE State=UP
-        """
+            # ACCOUNTING
+            AccountingStorageLoc=/var/run/slurm-llnl/slurm-acct.txt
+            AccountingStorageType=accounting_storage/filetxt
+            AccountingStoreJobComment=YES
+            JobAcctGatherFrequency=30
+            JobAcctGatherType=jobacct_gather/linux
+
+            # COMPUTE NODES
+            NodeName=localhost Procs=1 State=UNKNOWN
+            PartitionName=debug Nodes=localhost Default=YES MaxTime=INFINITE State=UP
+        """)
         file_name = '/etc/slurm-llnl/slurm.conf'
         # Put config file in: /etc/slurm-llnl/slurm.conf
         put( remote_path=file_name, local_path=StringIO( slurm_conf ) )
